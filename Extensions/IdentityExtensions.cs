@@ -9,9 +9,9 @@ namespace HonuTasks.Extensions
 {
     public class IdentityExtensions
     {
-        public static int? GetUserId(this IIdentity identity)
+        public static int? GetEventUserId(this IIdentity identity)
         {
-            Claim claim = ((ClaimsIdentity)identity).FindFirst("CompanyId");
+            Claim claim = ((ClaimsIdentity)identity).FindFirst("EventUserId");
             return (claim != null) ? int.Parse(claim.Value) : null;
         }
 

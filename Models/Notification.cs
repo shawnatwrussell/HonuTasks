@@ -39,7 +39,7 @@ namespace HonuTasks.Models
 
 
         //Navigational Properties
-        public virtual Task Task { get; set; }
+        public virtual Tasks Task { get; set; }
 
         public virtual HTUser Recipient { get; set; }
 

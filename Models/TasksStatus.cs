@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HonuTasks.Models
 {
-    public class TaskStatus
+    public class TasksStatus
     {
         //Primary Key
         public int Id { get; set; }

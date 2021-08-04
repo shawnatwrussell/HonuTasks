@@ -9,42 +9,17 @@ using System.Threading.Tasks;
 
 namespace HonuTasks.Models
 {
-    public class Event
+    public class EventUser
     {
         public int Id { get; set; }
 
-        public int? EventPriorityId { get; set; }
-
-        public int? EventStatusId { get; set; }
-
         [Required]
         [StringLength(50)]
-        [DisplayName("Event Name")]
+        [DisplayName("User Name")]
         public string Name { get; set; }
 
-        [Required]
         [DisplayName("Description")]
         public string Description { get; set; }
-
-        [DataType(DataType.Date)]
-        [DisplayName("Date Started")]
-        public DateTime StartDate { get; set; }
-
-        [DataType(DataType.Date)]
-        [DisplayName("End Date")]
-        public DateTime? EndDate { get; set; }
-
-        [DisplayName("Archived")]
-        public bool Archived { get; set; }
-
-        [DataType(DataType.Date)]
-        [DisplayName("Date Archived")]
-        public DateTimeOffset? ArchivedDate { get; set; }
-
-        [DataType(DataType.Date)]
-        [DisplayName("Date Created")]
-        public DateTimeOffset Created { get; set; }
-
 
         //Image File Properties
         [NotMapped]
@@ -63,13 +38,14 @@ namespace HonuTasks.Models
 
 
         //Navigational Properties
+        public virtual ICollection<HTUser> Members { get; set; } =
+            new HashSet<HTUser>();
 
-        public virtual ICollection<HTUser> Members { get; set; } = new HashSet<HTUser>();
+        public virtual ICollection<Event> Projects { get; set; } =
+            new HashSet<Event>();
 
-        public virtual EventPriority EventPriority { get; set; }
-        public virtual EventStatus EventStatus { get; set; }
-
-        public virtual ICollection<Tasks> Tasks { get; set; } = new HashSet<Tasks>();
+        public virtual ICollection<Invite> Invites { get; set; } =
+            new HashSet<Invite>();
 
     }
 }

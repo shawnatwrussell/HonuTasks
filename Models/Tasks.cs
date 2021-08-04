@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HonuTasks.Models
 {
-    public class Task
+    public class Tasks
     {
         //Primary Key
         public int Id { get; set; }
@@ -17,7 +17,7 @@ namespace HonuTasks.Models
         public int EventId { get; set; }  //was ProjectId in BT
 
         [DisplayName("User")]
-        public string UserId { get; set; }
+        public string EventUserId { get; set; }
 
         [DisplayName("Task Priority")]
         public int TaskPriorityId { get; set; }  //was TicketPriorityId in BT
@@ -70,7 +70,7 @@ namespace HonuTasks.Models
 
         public virtual TaskPriority TaskPriority { get; set; }
 
-        public virtual TaskStatus TaskStatus { get; set; }
+        public virtual TasksStatus TaskStatus { get; set; }
 
         public virtual TaskType TaskType { get; set; }
 
@@ -88,8 +88,8 @@ namespace HonuTasks.Models
 
         //"virtual" = grabs it from the Db when needed
 
-        public virtual IEnumerable<Task> AssignedTasks { get; set; }
-        public virtual IEnumerable<Task> CreatorTasks { get; set; }
+        public virtual IEnumerable<Tasks> AssignedTasks { get; set; }
+        public virtual IEnumerable<Tasks> CreatorTasks { get; set; }
 
 
     }

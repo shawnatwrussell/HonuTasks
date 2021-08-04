@@ -35,7 +35,7 @@ namespace HonuTasks.Models
 
 
         //Navigational Properties
-        public virtual Task Task { get; set; }
+        public virtual Tasks Task { get; set; }
         //References the Parent-property: Task class
 
         public virtual HTUser User { get; set; }
