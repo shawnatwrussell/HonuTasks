@@ -12,8 +12,8 @@ namespace HonuTasks.Models.ViewModels
         public int EventId { get; set; }
 
 
-        public List<Event> Events { get; set; }
-        public Event Name { get; set; }
+        public List<Events> Events { get; set; }
+        public Events Name { get; set; }
         public Tasks Title { get; set; }
         public List<Tasks> Tasks { get; set; }
         public List<Tasks> AssignedTasks { get; set; }

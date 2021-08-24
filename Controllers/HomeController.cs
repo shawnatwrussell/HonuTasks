@@ -1,9 +1,14 @@
-﻿using HonuTasks.Models;
+﻿using HonuTasks.Data;
+using HonuTasks.Models;
+using HonuTasks.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,20 +20,20 @@ namespace HonuTasks.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<BTUser> _userManager;
-        private readonly IBTCompanyInfoService _infoService;
-        private readonly IBTTicketService _ticketService;
-        private readonly IBTProjectService _projectService;
+        private readonly UserManager<HTUser> _userManager;
+        private readonly IHTCreatorInfoService _infoService;
+        private readonly IHTTaskService _ticketService;
+        private readonly IHTEventService _projectService;
 
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger,
             ApplicationDbContext context,
             RoleManager<IdentityRole> roleManager,
-            UserManager<BTUser> userManager,
-            IBTCompanyInfoService infoService,
-            IBTTicketService ticketService,
-            IBTProjectService projectService
+            UserManager<HTUser> userManager,
+            IHTCreatorInfoService infoService,
+            IHTTaskService ticketService,
+            IHTEventService projectService
             )
         {
             _logger = logger;
@@ -53,14 +58,14 @@ namespace HonuTasks.Controllers
 
         public async Task<IActionResult> Dashboard()
         {
-            int companyId = User.Identity.GetCompanyId().Value;
-            BTUser user = await _userManager.GetUserAsync(User);
+            int creatorId = User.Identity.GetCreatorId().Value;
+            HTUser user = await _userManager.GetUserAsync(User);
 
             DashboardViewModel model = new()
             {
-                Projects = await _projectService.GetAllProjectsByCompany(companyId),
-                Tickets = await _ticketService.GetAllTicketsByCompanyAsync(companyId),
-                Members = await _infoService.GetAllMembersAsync(companyId),
+                Events = await _projectService.GetAllProjectsByCompany(creatorId),
+                Tasks = await _ticketService.GetAllTicketsByCompanyAsync(creatorId),
+                Members = await _infoService.GetAllMembersAsync(creatorId),
                 DevTickets = await _ticketService.GetAllTicketsByRoleAsync("Developer", user.Id),
                 SubmittedTickets = await _ticketService.GetAllTicketsByRoleAsync("Submitter", user.Id),
                 CurrentUser = user,
@@ -90,23 +95,23 @@ namespace HonuTasks.Controllers
         [HttpPost]
         public async Task<JsonResult> DonutMethod()
         {
-            int companyId = User.Identity.GetCompanyId().Value;
+            int creatorId = User.Identity.GetCompanyId().Value;
             Random rnd = new();
 
-            List<Ticket> tickets = (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).OrderBy(t => t.Id).ToList();
-            List<TicketStatus> statuses = _context.TicketStatus.ToList();
+            List<Tasks> tasks = (await _taskService.GetAllTasksByCompanyAsync(creatorId)).OrderBy(t => t.Id).ToList();
+            List<TasksStatus> statuses = _context.TasksStatus.ToList();
             ChartViewModel chartData = new();
-            chartData.labels = tickets.Select(t => t.TicketStatus.Name).Distinct().ToArray();
+            chartData.labels = tasks.Select(t => t.TaskStatus.Name).Distinct().ToArray();
 
             List<SubData> dsArray = new();
-            List<int> numberOfTickets = new();
+            List<int> numberOfTasks = new();
             List<string> colors = new();
 
             foreach (var status in chartData.labels.ToList())
             {
                 var statusId = statuses.FirstOrDefault(s => s.Name == status).Id;
 
-                numberOfTickets.Add(tickets.Where(t => t.TicketStatusId == statusId).Count());
+                numberOfTasks.Add(tasks.Where(t => t.TaskStatusId == statusId).Count());
 
                 //This code will randomly select a color for each element of the data
                 Color randomColor = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
@@ -117,7 +122,7 @@ namespace HonuTasks.Controllers
 
             SubData temp = new()
             {
-                data = numberOfTickets.ToArray(),
+                data = numberOfTasks.ToArray(),
                 backgroundColor = colors.ToArray()
             };
 
@@ -130,23 +135,23 @@ namespace HonuTasks.Controllers
 
         public async Task<JsonResult> PieMethod()
         {
-            int companyId = User.Identity.GetCompanyId().Value;
+            int companyId = User.Identity.GetCreatorId().Value;
             Random rnd = new();
 
-            List<Ticket> tickets = (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).OrderBy(t => t.Id).ToList();
-            List<TicketPriority> priorities = _context.TicketPriority.ToList();
+            List<Tasks> tasks = (await _taskService.GetAllTasksByCreatorAsync(creatorId)).OrderBy(t => t.Id).ToList();
+            List<TaskPriority> priorities = _context.TicketPriority.ToList();
             ChartViewModel chartData = new();
-            chartData.labels = tickets.Select(p => p.TicketPriority.Name).Distinct().ToArray();
+            chartData.labels = tasks.Select(p => p.TaskPriority.Name).Distinct().ToArray();
 
             List<SubData> dsArray = new();
-            List<int> numberOfTickets = new();
+            List<int> numberOfTasks = new();
             List<string> colors = new();
 
             foreach (var priority in chartData.labels.ToList())
             {
                 var priorityId = priorities.FirstOrDefault(p => p.Name == priority).Id;
 
-                numberOfTickets.Add(tickets.Where(t => t.TicketPriorityId == priorityId).Count());
+                numberOfTasks.Add(tasks.Where(t => t.TaskPriorityId == priorityId).Count());
 
                 //This code will randomly select a color for each element of the data
                 Color randomColor = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
@@ -157,7 +162,7 @@ namespace HonuTasks.Controllers
 
             SubData temp = new()
             {
-                data = numberOfTickets.ToArray(),
+                data = numberOfTasks.ToArray(),
                 backgroundColor = colors.ToArray()
             };
 
@@ -170,13 +175,13 @@ namespace HonuTasks.Controllers
 
         public async Task<JsonResult> PieTwoMethod()
         {
-            int companyId = User.Identity.GetCompanyId().Value;
+            int companyId = User.Identity.GetCreatorId().Value;
             Random rnd = new();
 
-            List<Ticket> tickets = (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).OrderBy(t => t.Id).ToList();
-            List<TicketType> types = _context.TicketType.ToList();
+            List<Task> tickets = (await _taskService.GetAllTicketsByCompanyAsync(creatorId)).OrderBy(t => t.Id).ToList();
+            List<TaskType> types = _context.TaskType.ToList();
             ChartViewModel chartData = new();
-            chartData.labels = tickets.Select(p => p.TicketType.Name).Distinct().ToArray();
+            chartData.labels = tickets.Select(p => p.TaskType.Name).Distinct().ToArray();
 
             List<SubData> dsArray = new();
             List<int> numberOfTickets = new();
@@ -186,7 +191,7 @@ namespace HonuTasks.Controllers
             {
                 var typeId = types.FirstOrDefault(p => p.Name == type).Id;
 
-                numberOfTickets.Add(tickets.Where(t => t.TicketTypeId == typeId).Count());
+                numberOfTasks.Add(tasks.Where(t => t.TaskTypeId == typeId).Count());
 
                 //This code will randomly select a color for each element of the data
                 Color randomColor = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
@@ -197,7 +202,7 @@ namespace HonuTasks.Controllers
 
             SubData temp = new()
             {
-                data = numberOfTickets.ToArray(),
+                data = numberOfTasks.ToArray(),
                 backgroundColor = colors.ToArray()
             };
 
@@ -207,3 +212,4 @@ namespace HonuTasks.Controllers
 
             return Json(chartData);
         }
+    }

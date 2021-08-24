@@ -62,7 +62,7 @@ namespace HonuTasks.Models
 
 
         //Navigational Properties
-        public virtual Event Event { get; set; }
+        public virtual Events Event { get; set; }
 
         public virtual HTUser User { get; set; }
         public virtual HTUser OwnerUser { get; set; }

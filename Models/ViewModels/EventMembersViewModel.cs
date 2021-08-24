@@ -8,7 +8,7 @@ namespace HonuTasks.Models.ViewModels
 {
     public class EventMembersViewModel
     {
-        public Event Event { get; set; } = new();
+        public Events Event { get; set; } = new();
         public MultiSelectList Users { get; set; }  //populates list box
         public string[] SelectedUsers { get; set; }  //receives selected users
 

@@ -13,9 +13,9 @@ namespace HonuTasks.Services.Interfaces
 
         Task<List<HTUser>> GetAllMembersAsync(int eventUserId);
 
-        Task<List<Event>> GetAllProjectsAsync(int userId);
+        Task<List<Events>> GetAllProjectsAsync(int userId);
 
-        Task<List<Tasks>> GetAllTicketsAsync(int eventUserId);
+        Task<List<Task>> GetAllTicketsAsync(int eventUserId);
 
         Task<List<HTUser>> GetMembersInRoleAsync(string roleName, int eventUserId);
 

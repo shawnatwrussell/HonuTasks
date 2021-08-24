@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace HonuTasks.Models
 {
-    public class EventUser
+    public class Creator
     {
         public int Id { get; set; }
 
         [Required]
         [StringLength(50)]
-        [DisplayName("User Name")]
+        [DisplayName("Creator Name")]
         public string Name { get; set; }
 
         [DisplayName("Description")]
@@ -46,6 +46,5 @@ namespace HonuTasks.Models
 
         public virtual ICollection<Invite> Invites { get; set; } =
             new HashSet<Invite>();
-
     }
 }

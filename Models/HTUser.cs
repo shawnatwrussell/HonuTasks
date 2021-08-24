@@ -55,8 +55,8 @@ namespace HonuTasks.Models
         public int? EventId { get; set; }
 
         //Navigational Properties
-        public virtual ICollection<Event> Events { get; set; } =
-            new HashSet<Event>();
+        public virtual ICollection<Events> Events { get; set; } =
+            new HashSet<Events>();
 
     }
 }

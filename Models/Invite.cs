@@ -48,7 +48,7 @@ namespace HonuTasks.Models
 
         public virtual HTUser Invitee { get; set; }
 
-        public virtual Event Event { get; set; }
+        public virtual Events Event { get; set; }
 
 
     }

@@ -33,9 +33,10 @@ namespace HonuTasks.Data
         public DbSet<HonuTasks.Models.HTUser> User { get; set; }
         public DbSet<HonuTasks.Models.Invite> Invite { get; set; }
         public DbSet<HonuTasks.Models.Notification> Notification { get; set; }
-        public DbSet<HonuTasks.Models.Event> Event { get; set; }
+        public DbSet<HonuTasks.Models.Events> Events { get; set; }
         public DbSet<HonuTasks.Models.EventPriority> EventPriority { get; set; }
         public DbSet<HonuTasks.Models.EventStatus> EventStatus { get; set; }
+        public DbSet<HonuTasks.Models.Creator> Creator { get; set; }
         public DbSet<HonuTasks.Models.Tasks> Tasks { get; set; }
         public DbSet<HonuTasks.Models.TaskAttachment> TaskAttachment { get; set; }
         public DbSet<HonuTasks.Models.TaskComment> TaskComment { get; set; }
@@ -43,6 +44,7 @@ namespace HonuTasks.Data
         public DbSet<HonuTasks.Models.TaskPriority> TaskPriority { get; set; }
         public DbSet<HonuTasks.Models.TasksStatus> TasksStatus { get; set; }
         public DbSet<HonuTasks.Models.TaskType> TaskType { get; set; }
+
 
     }
 }

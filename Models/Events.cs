@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 
 namespace HonuTasks.Models
 {
-    public class Event
+    public class Events
     {
         public int Id { get; set; }
+
+        public int? CreatorId { get; set; }
 
         public int? EventPriorityId { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using HonuTasks.Models;
 using HonuTasks.Models.Enums;
+using HonuTasks.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -7,6 +8,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Npgsql;
+using HonuTasks.Models;
+using HonuTasks.Models.Enums;
+using HonuTasks.Services.Interfaces;
+
+
 
 namespace HonuTasks.Data
 {
@@ -15,13 +25,14 @@ namespace HonuTasks.Data
     public class DataUtility
     {
         //Get company Ids
-        private static int company1Id;
-        private static int company2Id;
-        private static int company3Id;
-        private static int company4Id;
-        private static int company5Id;
-        private static int company6Id;
-        private static int company7Id;
+        private static int creator1Id;
+        private static int creator2Id;
+        private static int creator3Id;
+        private static int creator4Id;
+        private static int creator5Id;
+        private static int creator6Id;
+        private static int creator7Id;
+        private static object dbEvent;
 
         public static string GetConnectionString(IConfiguration configuration)
 
@@ -55,7 +66,7 @@ namespace HonuTasks.Data
         }
 
         //Add Data to the Database
-        public static async Task ManageDataAsync(IHost host)
+        public static async Tasks ManageDataAsync(IHost host)
         {
             using var svcScope = host.Services.CreateScope();
             var svcProvider = svcScope.ServiceProvider;
@@ -67,190 +78,190 @@ namespace HonuTasks.Data
             var roleManagerSvc = svcProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             //Service: An instance of the UserManager
-            var userManagerSvc = svcProvider.GetRequiredService<UserManager<BTUser>>();
+            var userManagerSvc = svcProvider.GetRequiredService<UserManager<HTUser>>();
 
             var configuration = svcProvider.GetRequiredService<IConfiguration>();
-            var imageSvc = svcProvider.GetRequiredService<IBTImageService>();
+            var imageSvc = svcProvider.GetRequiredService<IHTImageService>();
             //TsTEP 1: This is the programmatic equivalent to Update-Database
             await dbContextSvc.Database.MigrateAsync();
 
             //Custom  Bug Tracker Seed Methods
             await SeedRolesAsync(userManagerSvc, roleManagerSvc);
-            await SeedDefaultCompaniesAsync(dbContextSvc);
+            await SeedDefaultCreatorsAsync(dbContextSvc);
             await SeedDefaultUsersAsync(userManagerSvc, roleManagerSvc, configuration, imageSvc);
             await SeedDemoUsersAsync(userManagerSvc, roleManagerSvc, configuration, imageSvc);
-            await SeedDefaultTicketTypeAsync(dbContextSvc);
-            await SeedDefaultTicketStatusAsync(dbContextSvc);
-            await SeedDefaultTicketPriorityAsync(dbContextSvc);
-            await SeedDefaultProjectPriorityAsync(dbContextSvc);
-            await SeedDefautProjectsAsync(dbContextSvc);
-            await SeedDefautTicketsAsync(dbContextSvc);
+            await SeedDefaultTaskTypeAsync(dbContextSvc);
+            await SeedDefaultTasksStatusAsync(dbContextSvc);
+            await SeedDefaultTaskPriorityAsync(dbContextSvc);
+            await SeedDefaultEventPriorityAsync(dbContextSvc);
+            await SeedDefautEventAsync(dbContextSvc);
+            await SeedDefautTasksAsync(dbContextSvc);
         }
 
-        public static async Task SeedRolesAsync(UserManager<BTUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async System.Threading.Tasks.Task SeedRolesAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             //Seed Roles
             await roleManager.CreateAsync(new IdentityRole(Roles.Admin.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.ProjectManager.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Developer.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Submitter.ToString()));
+            await roleManager.CreateAsync(new IdentityRole(Roles.EventManager.ToString()));
+            await roleManager.CreateAsync(new IdentityRole(Roles.AssignedUser.ToString()));
+            await roleManager.CreateAsync(new IdentityRole(Roles.OwnerUser.ToString()));
             //await roleManager.CreateAsync(new IdentityRole(Roles.NewUser.ToString()));
             await roleManager.CreateAsync(new IdentityRole(Roles.DemoUser.ToString()));
         }
 
-        public static async Task SeedDefaultCompaniesAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefaultCreatorsAsync(ApplicationDbContext context)
         {
             try
             {
-                IList<Company> defaultcompanies = new List<Company>() {
-                    new Company() { Name = "Company1", Description="This is default Company 1" },
-                    new Company() { Name = "Company2", Description="This is default Company 2" },
-                    new Company() { Name = "Company3", Description="This is default Company 3" },
-                    new Company() { Name = "Company4", Description="This is default Company 4" },
-                    new Company() { Name = "Company5", Description="This is default Company 5" },
-                    new Company() { Name = "Company6", Description="This is default Company 6" },
-                    new Company() { Name = "Company7", Description="This is default Company 7" }
+                IList<Creator> defaultCreators = new List<Creator>() {
+                    new Creator() { Name = "Creator1", Description="This is default Creator 1" },
+                    new Creator() { Name = "Creator2", Description="This is default Creator 2" },
+                    new Creator() { Name = "Creator3", Description="This is default Creator 3" },
+                    new Creator() { Name = "Creator4", Description="This is default Creator 4" },
+                    new Creator() { Name = "Creator5", Description="This is default Creator 5" },
+                    new Creator() { Name = "Creator6", Description="This is default Creator 6" },
+                    new Creator() { Name = "Creator7", Description="This is default Creator 7" }
                 };
 
-                var dbCompanies = context.Company.Select(c => c.Name).ToList();
-                await context.Company.AddRangeAsync(defaultcompanies.Where(c => !dbCompanies.Contains(c.Name)));
+                var dbCreators = context.Creator.Select(c => c.Name).ToList();
+                await context.Creator.AddRangeAsync(defaultCreators.Where(c => !dbCreators.Contains(c.Name)));
                 context.SaveChanges();
 
                 //Get company Ids
-                company1Id = context.Company.FirstOrDefault(p => p.Name == "Company1").Id;
-                company2Id = context.Company.FirstOrDefault(p => p.Name == "Company2").Id;
-                company3Id = context.Company.FirstOrDefault(p => p.Name == "Company3").Id;
-                company4Id = context.Company.FirstOrDefault(p => p.Name == "Company4").Id;
-                company5Id = context.Company.FirstOrDefault(p => p.Name == "Company5").Id;
-                company6Id = context.Company.FirstOrDefault(p => p.Name == "Company6").Id;
-                company7Id = context.Company.FirstOrDefault(p => p.Name == "Company7").Id;
+                creator1Id = context.Creator.FirstOrDefault(p => p.Name == "Creator1").Id;
+                creator2Id = context.Creator.FirstOrDefault(p => p.Name == "Creator2").Id;
+                creator3Id = context.Creator.FirstOrDefault(p => p.Name == "Creator3").Id;
+                creator4Id = context.Creator.FirstOrDefault(p => p.Name == "Creator4").Id;
+                creator5Id = context.Creator.FirstOrDefault(p => p.Name == "Creator5").Id;
+                creator6Id = context.Creator.FirstOrDefault(p => p.Name == "Creator6").Id;
+                creator7Id = context.Creator.FirstOrDefault(p => p.Name == "Creator7").Id;
 
             }
 
             catch (Exception ex)
             {
                 Debug.WriteLine("*************  ERROR  *************");
-                Debug.WriteLine("Error Seeding Companies.");
+                Debug.WriteLine("Error Seeding Creators.");
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine("***********************************");
                 throw;
             }
         }
 
-        public static async Task SeedDefaultProjectPriorityAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefaultEventPriorityAsync(ApplicationDbContext context)
         {
             try
             {
-                IList<ProjectPriority> projectPriorities = new List<ProjectPriority>() {
-                                                            new ProjectPriority() { Name = "Low" },
-                                                            new ProjectPriority() { Name = "Medium" },
-                                                            new ProjectPriority() { Name = "High" },
-                                                            new ProjectPriority() { Name = "Urgent" },
+                IList<EventPriority> eventPriorities = new List<EventPriority>() {
+                                                            new EventPriority() { Name = "Low" },
+                                                            new EventPriority() { Name = "Medium" },
+                                                            new EventPriority() { Name = "High" },
+                                                            new EventPriority() { Name = "Urgent" },
                 };
 
-                var dbProjectPriorities = context.ProjectPriority.Select(c => c.Name).ToList();
-                await context.ProjectPriority.AddRangeAsync(projectPriorities.Where(c => !dbProjectPriorities.Contains(c.Name)));
+                var dbEventPriorities = context.EventPriority.Select(c => c.Name).ToList();
+                await context.EventPriority.AddRangeAsync(eventPriorities.Where(c => !dbEventPriorities.Contains(c.Name)));
                 context.SaveChanges();
 
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("*************  ERROR  *************");
-                Debug.WriteLine("Error Seeding Project Priorities.");
+                Debug.WriteLine("Error Seeding Event Priorities.");
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine("***********************************");
                 throw;
             }
         }
 
-        public static async Task SeedDefautProjectsAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefautEventsAsync(ApplicationDbContext context)
         {
             //Get project priority Ids
-            int priorityLow = context.ProjectPriority.FirstOrDefault(p => p.Name == "Low").Id;
-            int priorityMedium = context.ProjectPriority.FirstOrDefault(p => p.Name == "Medium").Id;
-            int priorityHigh = context.ProjectPriority.FirstOrDefault(p => p.Name == "High").Id;
-            int priorityUrgent = context.ProjectPriority.FirstOrDefault(p => p.Name == "Urgent").Id;
+            int priorityLow = context.EventPriority.FirstOrDefault(p => p.Name == "Low").Id;
+            int priorityMedium = context.EventPriority.FirstOrDefault(p => p.Name == "Medium").Id;
+            int priorityHigh = context.EventPriority.FirstOrDefault(p => p.Name == "High").Id;
+            int priorityUrgent = context.EventPriority.FirstOrDefault(p => p.Name == "Urgent").Id;
 
             try
             {
-                IList<Project> projects = new List<Project>() {
-                     new Project()
+                IList<Events> events = new List<Events>() {
+                     new Events()
                      {
-                         CompanyId = company1Id,
+                         CreatorId = creator1Id,
                          Name = "Build a Personal Porfolio",
                          Description="Single page html, css & javascript page.  Serves as a landing page for candidates and contains a bio and links to all applications and challenges." ,
                          StartDate = new DateTime(2021,4,5),
                          EndDate = new DateTime(2021,4,5).AddMonths(3),
-                         ProjectPriorityId = priorityLow
+                         EventPriorityId = priorityLow
                      },
-                     new Project()
+                     new Events()
                      {
-                         CompanyId = company2Id,
+                         CreatorId = creator2Id,
                          Name = "Build a supplemental Blog Web Application",
                          Description="Candidate's custom built web application using .Net Core with MVC, a postgres database and hosted in a heroku container.  The app is designed for the candidate to create, update and maintain a live blog site.",
                          StartDate = new DateTime(2021,4,5),
                          EndDate = new DateTime(2021,4,5).AddMonths(3),
-                         ProjectPriorityId = priorityMedium
+                         EventPriorityId = priorityMedium
                      },
-                     new Project()
+                     new Events()
                      {
-                         CompanyId = company3Id,
+                         CreatorId = creator3Id,
                          Name = "Build an Issue Tracking Web Application",
                          Description="A custom designed .Net Core application with postgres database.  The application is a multi tennent application designed to track issue tickets' progress.  Implemented with identity and user roles, Tickets are maintained in projects which are maintained by users in the role of projectmanager.  Each project has a team and team members.",
                          StartDate = new DateTime(2021,4,5),
                          EndDate = new DateTime(2021,4,5).AddMonths(3),
-                         ProjectPriorityId = priorityHigh
+                         EventPriorityId = priorityHigh
                      },
-                    new Project()
+                    new Events()
                      {
-                         CompanyId = company1Id,
+                         CreatorId = creator1Id,
                          Name = "Build a Movie Information Web Application",
                          Description="A custom designed .Net Core application with postgres database.  An API based application allows users to input and import movie posters and details including cast and crew information.",
                          StartDate = new DateTime(2021,4,5),
                          EndDate = new DateTime(2021,4,5).AddMonths(3),
-                         ProjectPriorityId = priorityHigh
+                         EventPriorityId = priorityHigh
                      },
-                     new Project()
+                     new Events()
                      {
-                         CompanyId = company2Id,
+                         CreatorId = creator2Id,
                          Name = "Build an Address Book Web Application",
                          Description="A custom designed .Net Core application with postgres database.  This is an application to serve as a rolodex of contacts for a given user..",
                          StartDate = new DateTime(2021,4,5),
                          EndDate = new DateTime(2021,4,5).AddMonths(3),
-                         ProjectPriorityId = priorityHigh
+                         EventPriorityId = priorityHigh
                      }
                 };
 
-                var dbProjects = context.Project.Select(c => c.Name).ToList();
-                await context.Project.AddRangeAsync(projects.Where(c => !dbProjects.Contains(c.Name)));
+                var dbEvents = context.Events.Select(c => c.Name).ToList();
+                await context.Events.AddRangeAsync(events.Where(c => !dbEvents.Contains(c.Name)));
                 context.SaveChanges();
             }
 
             catch (Exception ex)
             {
                 Debug.WriteLine("*************  ERROR  *************");
-                Debug.WriteLine("Error Seeding Projects.");
+                Debug.WriteLine("Error Seeding Events.");
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine("***********************************");
                 throw;
             }
         }
 
-        public static async Task SeedDefaultProjectStatusAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefaultEventStatusAsync(ApplicationDbContext context)
         {
             try
             {
-                IList<ProjectStatus> projectStatuses = new List<ProjectStatus>() {
-                    new ProjectStatus() { Name = "New" },                 // Newly Created ticket having never been assigned
-                    new ProjectStatus() { Name = "Unassigned" },          // Ticket has been assigned at some point but is currently unassigned
-                    new ProjectStatus() { Name = "Development" },         // Ticket is assigned and currently being worked 
-                    new ProjectStatus() { Name = "Testing" },             // Ticket is assigned and is currently being tested
-                    new ProjectStatus() { Name = "Resolved" },           // Ticket remains assigned to the developer but work in now complete
-                    new ProjectStatus() { Name = "Archived" }            // Ticket remains assigned to the developer but becomes inactive
+                IList<EventStatus> eventStatuses = new List<EventStatus>() {
+                    new EventStatus() { Name = "New" },                 // Newly Created ticket having never been assigned
+                    new EventStatus() { Name = "Unassigned" },          // Ticket has been assigned at some point but is currently unassigned
+                    new EventStatus() { Name = "Development" },         // Ticket is assigned and currently being worked 
+                    new EventStatus() { Name = "Testing" },             // Ticket is assigned and is currently being tested
+                    new EventStatus() { Name = "Resolved" },           // Ticket remains assigned to the developer but work in now complete
+                    new EventStatus() { Name = "Archived" }            // Ticket remains assigned to the developer but becomes inactive
                 };
 
-                var dbProjectStatuses = context.ProjectStatus.Select(c => c.Name).ToList();
-                await context.ProjectStatus.AddRangeAsync(projectStatuses.Where(c => !dbProjectStatuses.Contains(c.Name)));
+                var dbEventStatuses = context.EventStatus.Select(c => c.Name).ToList();
+                await context.EventStatus.AddRangeAsync(eventStatuses.Where(c => !dbEventStatuses.Contains(c.Name)));
                 context.SaveChanges();
 
             }
@@ -265,8 +276,8 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Task SeedDefaultUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration, IImageService imageService)
+        public static async Tasks SeedDefaultUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration, IHTImageService imageService)
         {
             var defaultImageData = await imageService.EncodeFileAsync(configuration["DefaultUserImage"]);
             var defaultContentType = configuration["DefaultUserImage"].Split('.')[1];
@@ -304,8 +315,8 @@ namespace HonuTasks.Data
 
         }
 
-        public static async Task SeedDemoUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration, IBTImageService imageService)
+        public static async Tasks SeedDemoUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration, IHTImageService imageService)
         {
             var defaultImageData = await imageService.EncodeFileAsync(configuration["DefaultUserImage"]);
             var defaultContentType = configuration["DefaultUserImage"].Split('.')[1];
@@ -477,7 +488,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Task SeedDefaultTaskTypeAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefaultTaskTypeAsync(ApplicationDbContext context)
         {
             try
             {
@@ -496,14 +507,14 @@ namespace HonuTasks.Data
             catch (Exception ex)
             {
                 Debug.WriteLine("*************  ERROR  *************");
-                Debug.WriteLine("Error Seeding Ticket Types.");
+                Debug.WriteLine("Error Seeding Task Types.");
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine("***********************************");
                 throw;
             }
         }
 
-        public static async Task SeedDefaultTasksStatusAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefaultTasksStatusAsync(ApplicationDbContext context)
         {
             try
             {
@@ -532,7 +543,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Task SeedDefaultTaskPriorityAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefaultTaskPriorityAsync(ApplicationDbContext context)
         {
             try
             {
@@ -559,113 +570,111 @@ namespace HonuTasks.Data
             }
         }
 
-/*        public static async Task SeedDefautTicketsAsync(ApplicationDbContext context)
+        public static async Tasks SeedDefautTasksAsync(ApplicationDbContext context)
         {
             //Get project Ids
-            int portfolioId = context.Project.FirstOrDefault(p => p.Name == "Build a Personal Porfolio").Id;
-            int blogId = context.Project.FirstOrDefault(p => p.Name == "Build a supplemental Blog Web Application").Id;
-            int bugtrackerId = context.Project.FirstOrDefault(p => p.Name == "Build an Issue Tracking Web Application").Id;
+            int portfolioId = context.Events.FirstOrDefault(p => p.Name == "Build a Personal Porfolio").Id;
+            int blogId = context.Events.FirstOrDefault(p => p.Name == "Build a supplemental Blog Web Application").Id;
+            int bugtrackerId = context.Events.FirstOrDefault(p => p.Name == "Build an Issue Tracking Web Application").Id;
 
             //Get ticket type Ids
-            int typeNewDev = context.TicketType.FirstOrDefault(p => p.Name == "New Development").Id;
-            int typeRuntime = context.TicketType.FirstOrDefault(p => p.Name == "Runtime").Id;
-            int typeUI = context.TicketType.FirstOrDefault(p => p.Name == "UI").Id;
-            int typeMaintenance = context.TicketType.FirstOrDefault(p => p.Name == "Maintenance").Id;
+            int typeNewDev = context.TaskType.FirstOrDefault(p => p.Name == "New Development").Id;
+            int typeRuntime = context.TaskType.FirstOrDefault(p => p.Name == "Runtime").Id;
+            int typeUI = context.TaskType.FirstOrDefault(p => p.Name == "UI").Id;
+            int typeMaintenance = context.TaskType.FirstOrDefault(p => p.Name == "Maintenance").Id;
 
             //Get ticket priority Ids
-            int priorityLow = context.TicketPriority.FirstOrDefault(p => p.Name == "Low").Id;
-            int priorityMedium = context.TicketPriority.FirstOrDefault(p => p.Name == "Medium").Id;
-            int priorityHigh = context.TicketPriority.FirstOrDefault(p => p.Name == "High").Id;
-            int priorityUrgent = context.TicketPriority.FirstOrDefault(p => p.Name == "Urgent").Id;
+            int priorityLow = context.TaskPriority.FirstOrDefault(p => p.Name == "Low").Id;
+            int priorityMedium = context.TaskPriority.FirstOrDefault(p => p.Name == "Medium").Id;
+            int priorityHigh = context.TaskPriority.FirstOrDefault(p => p.Name == "High").Id;
+            int priorityUrgent = context.TaskPriority.FirstOrDefault(p => p.Name == "Urgent").Id;
 
             //Get ticket status Ids
-            int statusNew = context.TicketStatus.FirstOrDefault(p => p.Name == "New").Id;
-            int statusUnassigned = context.TicketStatus.FirstOrDefault(p => p.Name == "Unassigned").Id;
-            int statusDev = context.TicketStatus.FirstOrDefault(p => p.Name == "Development").Id;
-            int statusTest = context.TicketStatus.FirstOrDefault(p => p.Name == "Testing").Id;
-            int statusResolved = context.TicketStatus.FirstOrDefault(p => p.Name == "Resolved").Id;
+            int statusNew = context.TasksStatus.FirstOrDefault(p => p.Name == "New").Id;
+            int statusUnassigned = context.TasksStatus.FirstOrDefault(p => p.Name == "Unassigned").Id;
+            int statusDev = context.TasksStatus.FirstOrDefault(p => p.Name == "Development").Id;
+            int statusTest = context.TasksStatus.FirstOrDefault(p => p.Name == "Testing").Id;
+            int statusResolved = context.TasksStatus.FirstOrDefault(p => p.Name == "Resolved").Id;
 
             try
             {
-                IList<Ticket> tickets = new List<Ticket>() {
+                IList<Tasks> tasks = new List<Tasks>() {
                                 
                                 //PORTFOLIO
-                                new Ticket() {Title = "Portfolio Ticket 1", Description = "Ticket details for portfolio ticket 1", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityLow, TicketStatusId = statusNew, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Portfolio Ticket 2", Description = "Ticket details for portfolio ticket 2", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityMedium, TicketStatusId = statusUnassigned, TicketTypeId = typeMaintenance},
-                                new Ticket() {Title = "Portfolio Ticket 3", Description = "Ticket details for portfolio ticket 3", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityHigh, TicketStatusId = statusDev, TicketTypeId = typeUI},
-                                new Ticket() {Title = "Portfolio Ticket 4", Description = "Ticket details for portfolio ticket 4", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityUrgent, TicketStatusId = statusTest, TicketTypeId = typeRuntime},
-                                new Ticket() {Title = "Portfolio Ticket 5", Description = "Ticket details for portfolio ticket 5", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityLow, TicketStatusId = statusNew, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Portfolio Ticket 6", Description = "Ticket details for portfolio ticket 6", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityMedium, TicketStatusId = statusUnassigned, TicketTypeId = typeMaintenance},
-                                new Ticket() {Title = "Portfolio Ticket 7", Description = "Ticket details for portfolio ticket 7", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityHigh, TicketStatusId = statusDev, TicketTypeId = typeUI},
-                                new Ticket() {Title = "Portfolio Ticket 8", Description = "Ticket details for portfolio ticket 8", Created = DateTimeOffset.Now, ProjectId = portfolioId, TicketPriorityId = priorityUrgent, TicketStatusId = statusTest, TicketTypeId = typeRuntime},
+                                new Tasks() {Title = "Portfolio Ticket 1", Description = "Ticket details for portfolio ticket 1", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityLow, TaskStatusId = statusNew, TaskTypeId = typeNewDev},
+                                new Tasks() {Title = "Portfolio Ticket 2", Description = "Ticket details for portfolio ticket 2", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityMedium, TaskStatusId = statusUnassigned, TaskTypeId = typeMaintenance},
+                                new Tasks() {Title = "Portfolio Ticket 3", Description = "Ticket details for portfolio ticket 3", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityHigh, TaskStatusId = statusDev, TaskTypeId = typeUI},
+                                new Tasks() {Title = "Portfolio Ticket 4", Description = "Ticket details for portfolio ticket 4", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityUrgent, TaskStatusId = statusTest, TaskTypeId = typeRuntime},
+                                new Tasks() {Title = "Portfolio Ticket 5", Description = "Ticket details for portfolio ticket 5", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityLow, TaskStatusId = statusNew, TaskTypeId = typeNewDev},
+                                new Tasks() {Title = "Portfolio Ticket 6", Description = "Ticket details for portfolio ticket 6", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityMedium, TaskStatusId = statusUnassigned, TaskTypeId = typeMaintenance},
+                                new Tasks() {Title = "Portfolio Ticket 7", Description = "Ticket details for portfolio ticket 7", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityHigh, TaskStatusId = statusDev, TaskTypeId = typeUI},
+                                new Tasks() {Title = "Portfolio Ticket 8", Description = "Ticket details for portfolio ticket 8", Created = DateTimeOffset.Now, EventId = portfolioId, TaskPriorityId = priorityUrgent, TaskStatusId = statusTest, TaskTypeId = typeRuntime},
                                 
                                 //BLOG
-                                new Ticket() {Title = "Blog Ticket 1", Description = "Ticket details for blog ticket 1", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityLow, TicketStatusId = statusUnassigned, TicketTypeId = typeRuntime},
-                                new Ticket() {Title = "Blog Ticket 2", Description = "Ticket details for blog ticket 2", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityMedium, TicketStatusId = statusDev, TicketTypeId = typeUI},
-                                new Ticket() {Title = "Blog Ticket 3", Description = "Ticket details for blog ticket 3", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityHigh, TicketStatusId = statusNew, TicketTypeId = typeMaintenance},
-                                new Ticket() {Title = "Blog Ticket 4", Description = "Ticket details for blog ticket 4", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityUrgent, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Blog Ticket 5", Description = "Ticket details for blog ticket 5", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityLow, TicketStatusId = statusDev,  TicketTypeId = typeRuntime},
-                                new Ticket() {Title = "Blog Ticket 6", Description = "Ticket details for blog ticket 6", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityMedium, TicketStatusId = statusNew,  TicketTypeId = typeUI},
-                                new Ticket() {Title = "Blog Ticket 7", Description = "Ticket details for blog ticket 7", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeMaintenance},
-                                new Ticket() {Title = "Blog Ticket 8", Description = "Ticket details for blog ticket 8", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityUrgent, TicketStatusId = statusDev,  TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Blog Ticket 9", Description = "Ticket details for blog ticket 9", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityLow, TicketStatusId = statusNew,  TicketTypeId = typeRuntime},
-                                new Ticket() {Title = "Blog Ticket 10", Description = "Ticket details for blog ticket 10", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityMedium, TicketStatusId = statusUnassigned, TicketTypeId = typeUI},
-                                new Ticket() {Title = "Blog Ticket 11", Description = "Ticket details for blog ticket 11", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityHigh, TicketStatusId = statusDev,  TicketTypeId = typeMaintenance},
-                                new Ticket() {Title = "Blog Ticket 12", Description = "Ticket details for blog ticket 12", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityUrgent, TicketStatusId = statusNew,  TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Blog Ticket 13", Description = "Ticket details for blog ticket 13", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityLow, TicketStatusId = statusUnassigned, TicketTypeId = typeRuntime},
-                                new Ticket() {Title = "Blog Ticket 14", Description = "Ticket details for blog ticket 14", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityMedium, TicketStatusId = statusDev,  TicketTypeId = typeUI},
-                                new Ticket() {Title = "Blog Ticket 15", Description = "Ticket details for blog ticket 15", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityHigh, TicketStatusId = statusNew,  TicketTypeId = typeMaintenance},
-                                new Ticket() {Title = "Blog Ticket 16", Description = "Ticket details for blog ticket 16", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityUrgent, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Blog Ticket 17", Description = "Ticket details for blog ticket 17", Created = DateTimeOffset.Now, ProjectId = blogId, TicketPriorityId = priorityHigh, TicketStatusId = statusDev,  TicketTypeId = typeNewDev},
+                                new Tasks() {Title = "Blog Ticket 1", Description = "Ticket details for blog ticket 1", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityLow, TaskStatusId = statusUnassigned, TaskTypeId = typeRuntime},
+                                new Tasks() {Title = "Blog Ticket 2", Description = "Ticket details for blog ticket 2", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityMedium, TaskStatusId = statusDev, TaskTypeId = typeUI},
+                                new Tasks() {Title = "Blog Ticket 3", Description = "Ticket details for blog ticket 3", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityHigh, TaskStatusId = statusNew, TaskTypeId = typeMaintenance},
+                                new Tasks() {Title = "Blog Ticket 4", Description = "Ticket details for blog ticket 4", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityUrgent, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() {Title = "Blog Ticket 5", Description = "Ticket details for blog ticket 5", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityLow, TaskStatusId = statusDev,  TaskTypeId = typeRuntime},
+                                new Tasks() {Title = "Blog Ticket 6", Description = "Ticket details for blog ticket 6", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityMedium, TaskStatusId = statusNew,  TaskTypeId = typeUI},
+                                new Tasks() {Title = "Blog Ticket 7", Description = "Ticket details for blog ticket 7", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeMaintenance},
+                                new Tasks() {Title = "Blog Ticket 8", Description = "Ticket details for blog ticket 8", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityUrgent, TaskStatusId = statusDev,  TaskTypeId = typeNewDev},
+                                new Tasks() {Title = "Blog Ticket 9", Description = "Ticket details for blog ticket 9", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityLow, TaskStatusId = statusNew,  TaskTypeId = typeRuntime},
+                                new Tasks() {Title = "Blog Ticket 10", Description = "Ticket details for blog ticket 10", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityMedium, TaskStatusId = statusUnassigned, TaskTypeId = typeUI},
+                                new Tasks() {Title = "Blog Ticket 11", Description = "Ticket details for blog ticket 11", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityHigh, TaskStatusId = statusDev,  TaskTypeId = typeMaintenance},
+                                new Tasks() {Title = "Blog Ticket 12", Description = "Ticket details for blog ticket 12", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityUrgent, TaskStatusId = statusNew,  TaskTypeId = typeNewDev},
+                                new Tasks() {Title = "Blog Ticket 13", Description = "Ticket details for blog ticket 13", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityLow, TaskStatusId = statusUnassigned, TaskTypeId = typeRuntime},
+                                new Tasks() {Title = "Blog Ticket 14", Description = "Ticket details for blog ticket 14", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityMedium, TaskStatusId = statusDev,  TaskTypeId = typeUI},
+                                new Tasks() {Title = "Blog Ticket 15", Description = "Ticket details for blog ticket 15", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityHigh, TaskStatusId = statusNew,  TaskTypeId = typeMaintenance},
+                                new Tasks() {Title = "Blog Ticket 16", Description = "Ticket details for blog ticket 16", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityUrgent, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() {Title = "Blog Ticket 17", Description = "Ticket details for blog ticket 17", Created = DateTimeOffset.Now, EventId = blogId, TaskPriorityId = priorityHigh, TaskStatusId = statusDev,  TaskTypeId = typeNewDev},
                                 
                                 //BUGTRACKER                                                                                                                         
-                                new Ticket() {Title = "Bug Tracker Ticket 1", Description = "Build Landing Page", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 2", Description = "Ticket details for blog ticket 2", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 3", Description = "Ticket details for blog ticket 3", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 4", Description = "Ticket details for blog ticket 4", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 5", Description = "Ticket details for blog ticket 5", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 6", Description = "Ticket details for blog ticket 6", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 7", Description = "Ticket details for blog ticket 7", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 8", Description = "Ticket details for blog ticket 8", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 9", Description = "Ticket details for blog ticket 9", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 10", Description = "Ticket details for blog ticket 10", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 11", Description = "Ticket details for blog ticket 11", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 12", Description = "Ticket details for blog ticket 12", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 13", Description = "Ticket details for blog ticket 13", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 14", Description = "Ticket details for blog ticket 14", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 15", Description = "Ticket details for blog ticket 15", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 16", Description = "Ticket details for blog ticket 16", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 17", Description = "Ticket details for blog ticket 17", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 18", Description = "Ticket details for blog ticket 18", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 19", Description = "Ticket details for blog ticket 19", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 20", Description = "Ticket details for blog ticket 20", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 21", Description = "Ticket details for blog ticket 21", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 22", Description = "Ticket details for blog ticket 22", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 23", Description = "Ticket details for blog ticket 23", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 24", Description = "Ticket details for blog ticket 24", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 25", Description = "Ticket details for blog ticket 25", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 26", Description = "Ticket details for blog ticket 26", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 27", Description = "Ticket details for blog ticket 27", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 28", Description = "Ticket details for blog ticket 28", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 29", Description = "Ticket details for blog ticket 29", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
-                                new Ticket() {Title = "Bug Tracker Ticket 30", Description = "Ticket details for blog ticket 30", Created = DateTimeOffset.Now, ProjectId = bugtrackerId, TicketPriorityId = priorityHigh, TicketStatusId = statusUnassigned, TicketTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 1", Description = "Build Landing Page", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 2", Description = "Ticket details for blog ticket 2", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 3", Description = "Ticket details for blog ticket 3", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 4", Description = "Ticket details for blog ticket 4", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 5", Description = "Ticket details for blog ticket 5", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 6", Description = "Ticket details for blog ticket 6", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 7", Description = "Ticket details for blog ticket 7", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 8", Description = "Ticket details for blog ticket 8", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 9", Description = "Ticket details for blog ticket 9", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 10", Description = "Ticket details for blog ticket 10", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 11", Description = "Ticket details for blog ticket 11", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 12", Description = "Ticket details for blog ticket 12", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 13", Description = "Ticket details for blog ticket 13", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 14", Description = "Ticket details for blog ticket 14", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 15", Description = "Ticket details for blog ticket 15", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 16", Description = "Ticket details for blog ticket 16", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 17", Description = "Ticket details for blog ticket 17", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 18", Description = "Ticket details for blog ticket 18", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 19", Description = "Ticket details for blog ticket 19", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 20", Description = "Ticket details for blog ticket 20", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 21", Description = "Ticket details for blog ticket 21", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 22", Description = "Ticket details for blog ticket 22", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 23", Description = "Ticket details for blog ticket 23", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 24", Description = "Ticket details for blog ticket 24", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 25", Description = "Ticket details for blog ticket 25", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 26", Description = "Ticket details for blog ticket 26", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 27", Description = "Ticket details for blog ticket 27", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 28", Description = "Ticket details for blog ticket 28", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 29", Description = "Ticket details for blog ticket 29", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
+                                new Tasks() { Title = "Bug Tracker Ticket 30", Description = "Ticket details for blog ticket 30", Created = DateTimeOffset.Now, EventId = bugtrackerId, TaskPriorityId = priorityHigh, TaskStatusId = statusUnassigned, TaskTypeId = typeNewDev},
                 };
 
-                var dbTickets = context.Ticket.Select(c => c.Title).ToList();
-                await context.Ticket.AddRangeAsync(tickets.Where(c => !dbTickets.Contains(c.Title)));
+                var dbTasks = context.Tasks.Select(c => c.Title).ToList();
+                await context.Tasks.AddRangeAsync(tasks.Where(c => !dbTasks.Contains(c.Title)));
                 context.SaveChanges();
             }
 
             catch (Exception ex)
             {
                 Debug.WriteLine("*************  ERROR  *************");
-                Debug.WriteLine("Error Seeding Ticket.");
+                Debug.WriteLine("Error Seeding Task.");
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine("***********************************");
                 throw;
             }
         }
-*/
-    
     }
 }
