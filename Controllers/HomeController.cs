@@ -95,7 +95,7 @@ namespace HonuTasks.Controllers
         [HttpPost]
         public async Task<JsonResult> DonutMethod()
         {
-            int creatorId = User.Identity.GetCompanyId().Value;
+            int creatorId = User.Identity.GetCreatorId().Value;
             Random rnd = new();
 
             List<Tasks> tasks = (await _taskService.GetAllTasksByCompanyAsync(creatorId)).OrderBy(t => t.Id).ToList();
