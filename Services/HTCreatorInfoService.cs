@@ -2,6 +2,7 @@
 using HonuTasks.Models;
 using HonuTasks.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace HonuTasks.Services
         }
 
         //Get a List of all the Users in a Company
-        public async Task<List<HTUser>> GetAllMembersAsync(int companyId)
+        public async Task<List<HTUser>> GetAllMembersAsync(int creatorId)
         {
             List<HTUser> htUsers = new();
 
@@ -41,7 +42,7 @@ namespace HonuTasks.Services
                                              .Include(p => p.Tasks)
                                                 .ThenInclude(t => t.OwnerUser)
                                              .Include(p => p.Tasks)
-                                                .ThenInclude(t => t.DeveloperUser)
+                                                .ThenInclude(t => t.AssignedUser)
                                              .Include(p => p.Tasks)
                                                 .ThenInclude(t => t.Comments)
                                              .Include(p => p.Tasks)
@@ -51,7 +52,7 @@ namespace HonuTasks.Services
                                              .Include(p => p.Tasks)
                                                 .ThenInclude(t => t.TaskPriority)
                                              .Include(p => p.Tasks)
-                                                .ThenInclude(t => t.TaskStatuses)
+                                                .ThenInclude(t => t.TaskStatus)
                                              .Include(p => p.Tasks)
                                                 .ThenInclude(t => t.TaskType)
                                              .Where(p => p.CreatorId == creatorId).ToListAsync();
@@ -101,5 +102,9 @@ namespace HonuTasks.Services
             return roleUsers;
         }
 
+        public Task<Creator> GetCompanyInfoByIdAsync(int? creatorId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

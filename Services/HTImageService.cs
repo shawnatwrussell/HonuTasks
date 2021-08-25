@@ -9,10 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
+using HonuTasks.Services.Interfaces;
 
 namespace HonuTasks.Services
 {
-    public class HTImageService
+    public class HTImageService : IHTImageService
     {
         private const int DefaultMaxFileSize = 1024;
 
