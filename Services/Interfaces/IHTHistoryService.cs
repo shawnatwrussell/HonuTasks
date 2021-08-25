@@ -8,11 +8,11 @@ namespace HonuTasks.Services.Interfaces
 {
     public interface IHTHistoryService
     {
-        Task AddHistoryAsync(Tasks oldTicket, Tasks newTask, string userId);
+        Task AddHistoryAsync(Tasks oldTask, Tasks newTask, string userId);
 
-        Task<List<TaskHistory>> GetProjectTicketHistoriesAsync(int eventId);
+        Task<List<TaskHistory>> GetEventTaskHistoriesAsync(int eventId);
 
-        Task<List<TaskHistory>> GetCompanyTicketHistoriesAsync(int creatorId);
+        Task<List<TaskHistory>> GetCreatorTaskHistoriesAsync(int creatorId);
 
     }
 }
