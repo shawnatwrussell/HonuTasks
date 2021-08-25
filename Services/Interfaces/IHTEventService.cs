@@ -12,7 +12,7 @@ namespace HonuTasks.Services.Interfaces
 
         public Task<bool> AddUserToEventAsync(string userId, int eventId);
 
-        public Task RemoveUserFromEventAsync(string userId, int eventId);
+        public Task RemoveUsersFromEventAsync(string userId, int eventId);
 
         public Task RemoveUsersFromEventByRoleAsync(string userId, int eventId);
 
