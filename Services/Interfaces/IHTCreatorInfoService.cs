@@ -8,7 +8,7 @@ namespace HonuTasks.Services.Interfaces
 {
     public interface IHTCreatorInfoService
     {
-        Task<Creator> GetCompanyInfoByIdAsync(int? creatorId);
+        Task<Creator> GetCreatorInfoByIdAsync(int? creatorId);
 
         Task<List<HTUser>> GetAllMembersAsync(int creatorId);
 

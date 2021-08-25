@@ -22,7 +22,7 @@ namespace HonuTasks.Services
             _userManager = userManager;
         }
 
-        //Get a List of all the Users in a Company
+        //Get a List of all the Users associated with a specific Creator
         public async Task<List<HTUser>> GetAllMembersAsync(int creatorId)
         {
             List<HTUser> htUsers = new();
@@ -67,7 +67,7 @@ namespace HonuTasks.Services
 
             List<Events> events = new();
 
-            //Get ALL the Tickets Connected to the ProjectId, which is connected to the CompanyId
+            //Get ALL the Tasks Connected to the EventId, which is connected to the CreatorId
             events = await GetAllEventsAsync(creatorId);
 
             tasks = events.SelectMany(p => p.Tasks).ToList();
@@ -75,7 +75,7 @@ namespace HonuTasks.Services
             return tasks;
         }
 
-        //Get Specified info related to a Specific Company
+        //Get Specified info related to a Specific Creator
         public async Task<Creator> GetCreatorInfoByIdAsync(int? creatorId)
         {
             Creator creator = new();
@@ -100,11 +100,6 @@ namespace HonuTasks.Services
             List<HTUser> roleUsers = users.Where(u => u.CreatorId == creatorId).ToList();
 
             return roleUsers;
-        }
-
-        public Task<Creator> GetCompanyInfoByIdAsync(int? creatorId)
-        {
-            throw new NotImplementedException();
         }
     }
 }

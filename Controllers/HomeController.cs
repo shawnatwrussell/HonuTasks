@@ -1,6 +1,7 @@
 ﻿using HonuTasks.Data;
 using HonuTasks.Models;
 using HonuTasks.Models.ViewModels;
+using HonuTasks.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +23,8 @@ namespace HonuTasks.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<HTUser> _userManager;
         private readonly IHTCreatorInfoService _infoService;
-        private readonly IHTTaskService _ticketService;
-        private readonly IHTEventService _projectService;
+        private readonly IHTTasksService _taskService;
+        private readonly IHTEventService _eventService;
 
         private readonly ILogger<HomeController> _logger;
 
@@ -32,8 +33,8 @@ namespace HonuTasks.Controllers
             RoleManager<IdentityRole> roleManager,
             UserManager<HTUser> userManager,
             IHTCreatorInfoService infoService,
-            IHTTaskService ticketService,
-            IHTEventService projectService
+            IHTTasksService taskService,
+            IHTEventService eventService
             )
         {
             _logger = logger;
@@ -41,8 +42,8 @@ namespace HonuTasks.Controllers
             _roleManager = roleManager;
             _userManager = userManager;
             _infoService = infoService;
-            _ticketService = ticketService;
-            _projectService = projectService;
+            _taskService = taskService;
+            _eventService = eventService;
         }
 
         public IActionResult Index()
@@ -63,11 +64,11 @@ namespace HonuTasks.Controllers
 
             DashboardViewModel model = new()
             {
-                Events = await _projectService.GetAllProjectsByCompany(creatorId),
-                Tasks = await _ticketService.GetAllTicketsByCompanyAsync(creatorId),
+                Events = await _eventService.GetAllEventsByCreator(creatorId),
+                Tasks = await _taskService.GetAllTasksByCreatorAsync(creatorId),
                 Members = await _infoService.GetAllMembersAsync(creatorId),
-                DevTickets = await _ticketService.GetAllTicketsByRoleAsync("Developer", user.Id),
-                SubmittedTickets = await _ticketService.GetAllTicketsByRoleAsync("Submitter", user.Id),
+                DevTickets = await _taskService.GetAllTasksByRoleAsync("Assigned User", user.Id),
+                SubmittedTickets = await _taskService.GetAllTasksByRoleAsync("Submitter", user.Id),
                 CurrentUser = user,
 
                 //UnassignedTickets = (await _ticketService.GetAllTicketsByTypeAsync(companyId, "Unassigned")).ToList(),
@@ -139,7 +140,7 @@ namespace HonuTasks.Controllers
             Random rnd = new();
 
             List<Tasks> tasks = (await _taskService.GetAllTasksByCreatorAsync(creatorId)).OrderBy(t => t.Id).ToList();
-            List<TaskPriority> priorities = _context.TicketPriority.ToList();
+            List<TaskPriority> priorities = _context.TaskPriority.ToList();
             ChartViewModel chartData = new();
             chartData.labels = tasks.Select(p => p.TaskPriority.Name).Distinct().ToArray();
 
@@ -213,3 +214,4 @@ namespace HonuTasks.Controllers
             return Json(chartData);
         }
     }
+}

@@ -8,13 +8,13 @@ namespace HonuTasks.Services.Interfaces
 {
     public interface IHTTasksService
     {
-        Task AssignTicketAsync(int taskId, string userId);
+        Task AssignTaskAsync(int taskId, string userId);
 
         Task<HTUser> GetTasksDeveloperAsync(int taskId);
 
-        Task<List<Tasks>> GetAllTasksByCompanyAsync(int creatorId);
+        Task<List<Tasks>> GetAllTasksByCreatorAsync(int creatorId);
 
-        Task<List<Tasks>> GetArchivedTasksByCompanyAsync(int creatorId);
+        Task<List<Tasks>> GetArchivedTasksByCreatorAsync(int creatorId);
 
         Task<List<Tasks>> GetAllTasksByPriorityAsync(int creatorId, string priorityName);
 

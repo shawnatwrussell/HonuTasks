@@ -11,17 +11,21 @@ namespace HonuTasks.Models
     {
         public int Id { get; set; }
 
+        [Display(Name = "Creator")]
+        public int? CreatorId { get; set; }
+
+
         [Display(Name = "User")]
         public int? UserId { get; set; }
 
         [DisplayName("Event")]
-        public int? ProjectId { get; set; }
+        public int? EventId { get; set; }
 
         [DisplayName("Date")]
         public DateTimeOffset InviteDate { get; set; }
 
         [DisplayName("Code")]
-        public Guid CompanyToken { get; set; }
+        public Guid CreatorToken { get; set; }
 
         [DisplayName("Invitee")]
         public string InviteeId { get; set; }
