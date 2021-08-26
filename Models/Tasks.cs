@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HonuTasks.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -58,6 +59,9 @@ namespace HonuTasks.Models
         [DisplayName("Date Archived")]
         public DateTimeOffset? ArchivedDate { get; set; }
 
+        [Required] //selection on drop-down needed
+        [Display(Name = "Task Status")]
+        public TasksStatuses TasksStatuses { get; set; } //link to enum
 
 
 
@@ -70,7 +74,7 @@ namespace HonuTasks.Models
 
         public virtual TaskPriority TaskPriority { get; set; }
 
-        public virtual TasksStatus TaskStatus { get; set; }
+        public virtual TasksStatus TasksStatus { get; set; }
 
         public virtual TaskType TaskType { get; set; }
 
