@@ -18,15 +18,24 @@ namespace HonuTasks.Data
             Configuration = configuration;
         }
 
-        //SEED DATA
-/*        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
                 .UseNpgsql(
                     DataUtility.GetConnectionString(Configuration),
             o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
         }
-*/
+
+
+        //SEED DATA
+        /*        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+                {
+                    optionsBuilder
+                        .UseNpgsql(
+                            DataUtility.GetConnectionString(Configuration),
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                }
+        */
 
 
 
