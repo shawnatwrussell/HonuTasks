@@ -1,0 +1,179 @@
+﻿
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HonuTasks | Landing Page</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/dist/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+
+    <style>
+        body {
+            background-image: url('../../img/landing.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div class="container mt-3 pt-3">
+        <div class="row">
+            <div class="col">
+                <div class="jumbotron bg-info">
+                    <div class="image:url('../../img/banner.jpg')"></div>
+                    <h1 class="display-4">Honu Task</h1>
+                    <p class="lead">
+                        Be able to create Events and Tasks to organize your day-to-day chaos.
+
+                        This application features multi-tenancy and was built using C# .NET 5
+                        utilizing both the MVC and MVVM design patterns.
+                        The front end is a customized Bootstrap 4 template.
+                    </p>
+                    <p>Honu is Hawaiian for sea turtle, a symbol for Wisdom & Good Luck</p>
+                    <p class="lead">Developed and deployed on a PostgreSQL database managed with PgAdmin</p>
+                    <hr class="my-4">
+                    <p class="lead">
+                        <a class="btn btn-light btn-lg justify-content-center" asp-area="Identity" asp-page="/Account/Login">
+                            TRY IT OUT!
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--INFO CARDS-->
+    <div class="container mt-3 pt-3">
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-3">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header" style="text-center">
+                        <h3>Visualize</h3>
+                        <div class="card-body">
+                            <p>Use the built-in visualizers to assess your team's workload at-a-glance.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header" style="text-center">
+                        <h3>Prioritize</h3>
+                        <div class="card-body">
+                            <p>Manage and sort tasks by Urgency, Date, or Stage of Production.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header" style="text-center">
+                        <h3>Organize</h3>
+                        <div class="card-body">
+                            <p>Delegate tasks to your team, based on their role and assigned projects.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-2"></div>
+
+            <div class="col-sm-3">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header" style="text-center">
+                        <h3>Economize</h3>
+                        <div class="card-body">
+                            <p>Try Ariadne for free and then sign up for a custom account for your business.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header" style="text-center">
+                        <h3>Realize</h3>
+                        <div class="card-body">
+                            <p>Go from chaos to organized project management. Easily assign roles and tasks.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header" style="text-center">
+                        <h3>Customize</h3>
+                        <div class="card-body">
+                            <p>Ariadne's multi-tenant capabilities allow you to meet specific needs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+    </div>
+
+
+    <div class="container mt-3 pt-3">
+        <div class="row"></div>
+    </div>
+
+
+
+
+
+
+
+    <!-- Main Footer -->
+    <footer>
+        <ul class="list-inline text-center">
+            <strong>Copyright &copy; 2021 <a href="https://srussellportfolio.com">Shawna Russell</a>  </strong>
+            All rights reserved.
+            <div class="float-right d-none d-sm-inline-block">
+            </div>
+            <li class="list-inline-item">
+                <a href="https://twitter.com/sgccoder" target="_blank">
+                    <span class="fa-stack fa-lg">
+                        <i class="fas fa-circle fa-stack-2x"></i>
+                        <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                    </span>
+                </a>
+            </li>
+            <li class="list-inline-item">
+                <a href="https://www.linkedin.com/in/shawna-russell/" target="_blank">
+                    <span class="fa-stack fa-lg">
+                        <i class="fas fa-circle fa-stack-2x"></i>
+                        <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
+                    </span>
+                </a>
+            </li>
+            <li class="list-inline-item">
+                <a href="https://github.com/shawnatwrussell" target="_blank">
+                    <span class="fa-stack fa-lg">
+                        <i class="fas fa-circle fa-stack-2x"></i>
+                        <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </footer>
+
+
+    <!--SCRIPTS-->
+    <!-- jQuery -->
+    <script src="~/dist/js/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/dist/js/adminlte.min.js"></script>
+
+
+</body>
+</html>

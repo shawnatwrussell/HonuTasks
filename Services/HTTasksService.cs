@@ -40,7 +40,7 @@ namespace HonuTasks.Services
             _accessor = accessor;
         }
 
-        public async Task AssignTaskAsync(int taskId, string userId)
+        public async Task AssignTasksAsync(int taskId, string userId)
         {
             //ADD User to a Specific Ticket
             //userId
@@ -62,7 +62,7 @@ namespace HonuTasks.Services
             }
         }
 
-        public async Task<List<Tasks>> GetAllPMTicketsAsync(string userId)  //Removed: (int eventId)
+        public async Task<List<Tasks>> GetAllPMTasksAsync(string userId)  //Removed: (int eventId)
         {
             //LIST All the Event Managers ASSIGNED to (all) Tasks
             var user = await _context.Users.FindAsync(userId);
@@ -72,7 +72,7 @@ namespace HonuTasks.Services
             return tasks;
         }
 
-        public async Task<List<Tasks>> GetAllTasksByCompanyAsync(int creatorId)
+        public async Task<List<Tasks>> GetAllTasksByCreatorAsync(int creatorId)
         {
             //LIST All the Tasks Owned by a Specific Creator via the specific Event
             try
@@ -86,7 +86,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .ToListAsync();
@@ -99,10 +99,10 @@ namespace HonuTasks.Services
             }
         }
 
-        public async Task<List<Tasks>> GetAllTicketsByPriorityAsync(int creatorId, string priorityName)
+        public async Task<List<Tasks>> GetAllTasksByPriorityAsync(int creatorId, string priorityName)
         {
             //LIST All Tasks Given a Specific Priority(Id)
-            int priorityId = (await LookupTaskPriorityIdAsync(priorityName)).Value;
+            int priorityId = (await LookupTasksPriorityIdAsync(priorityName)).Value;
 
             return await _context.Events.Where(p => p.CreatorId == creatorId)
                                                       .SelectMany(p => p.Tasks)
@@ -112,7 +112,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.TaskPriorityId == priorityId)
@@ -121,7 +121,7 @@ namespace HonuTasks.Services
 
         public async Task<List<Tasks>> GetAllTasksByRoleAsync(string role, string userId)
         {
-            //LIST All Tickets with a Specific Role(roleName)
+            //LIST All Tasks with a Specific Role(roleName)
             List<Tasks> tasks = new();
 
             if (string.Compare(role, Roles.AssignedUser.ToString()) == 0)
@@ -134,7 +134,7 @@ namespace HonuTasks.Services
                                             .Include(t => t.AssignedUser)
                                             .Include(t => t.OwnerUser)
                                             .Include(t => t.TaskPriority)
-                                            .Include(t => t.TaskStatus)
+                                            .Include(t => t.TasksStatus)
                                             .Include(t => t.TaskType)
                                             .Include(t => t.Event)
                                                 .ThenInclude(p => p.Members)
@@ -158,13 +158,14 @@ namespace HonuTasks.Services
                                             .Include(t => t.AssignedUser)
                                             .Include(t => t.OwnerUser)
                                             .Include(t => t.TaskPriority)
-                                            .Include(t => t.TaskStatus)
+                                            .Include(t => t.TasksStatus)
                                             .Include(t => t.TaskType)
                                             .Include(t => t.Event)
                                                 .ThenInclude(p => p.Members)
                                             .Include(t => t.Event)
                                                 .ThenInclude(p => p.EventPriority)
-                                            .Where(t => t.OwnerUserId == userId).ToListAsync();
+                                            .Where(t => t.OwnerUserId == userId)
+                                            .ToListAsync();
                 }
                 catch
                 {
@@ -174,17 +175,17 @@ namespace HonuTasks.Services
             }
             else if (string.Compare(role, Roles.EventManager.ToString()) == 0)
             {
-                tasks = await GetAllPMTicketsAsync(userId);
+                tasks = await GetAllPMTasksAsync(userId);
             }
 
             return tasks;
 
         }
 
-        public async Task<List<Tasks>> GetProjectTasksByStatusAsync(int eventId, int creatorId, string statusName)
+        public async Task<List<Tasks>> GetEventTasksByStatusAsync(int eventId, int creatorId, string statusName)
         {
             //LIST All Tasks with a Specific Status(Id)
-            int statusId = (await LookupTaskStatusIdAsync(statusName)).Value;
+            int statusId = (await LookupTasksStatusIdAsync(statusName)).Value;
             List<Tasks> tasks = new();
 
             try
@@ -196,7 +197,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.TaskStatusId == statusId)
@@ -212,7 +213,7 @@ namespace HonuTasks.Services
         public async Task<List<Tasks>> GetEventTasksByPriorityAsync(int eventId, int creatorId, string priorityName)
         {
             //LIST All Tasks with a Specific Status(Id)
-            int priorityId = (await LookupTaskPriorityIdAsync(priorityName)).Value;
+            int priorityId = (await LookupTasksPriorityIdAsync(priorityName)).Value;
             List<Tasks> tasks = new();
 
             try
@@ -224,7 +225,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.TaskPriorityId == priorityId)
@@ -237,10 +238,10 @@ namespace HonuTasks.Services
             return tasks;
         }
 
-        public async Task<List<Tasks>> GetProjectTicketsByTypeAsync(int eventId, int creatorId, string typeName)
+        public async Task<List<Tasks>> GetEventTasksByTypeAsync(int eventId, int creatorId, string typeName)
         {
             //LIST All Tasks with a Specific Status(Id)
-            int typeId = (await LookupTaskTypeIdAsync(typeName)).Value;
+            int typeId = (await LookupTasksTypeIdAsync(typeName)).Value;
             List<Tasks> tasks = new();
 
             try
@@ -252,7 +253,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.TaskTypeId == typeId)
@@ -268,7 +269,7 @@ namespace HonuTasks.Services
         public async Task<List<Tasks>> GetAllTasksByStatusAsync(int creatorId, string statusName)
         {
             //LIST All Tasks with a Specific Status(Id)
-            int statusId = (await LookupTaskStatusIdAsync(statusName)).Value;
+            int statusId = (await LookupTasksStatusIdAsync(statusName)).Value;
 
             return await _context.Events.Where(p => p.CreatorId == creatorId)
                                                       .SelectMany(p => p.Tasks)
@@ -278,7 +279,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.TaskStatusId == statusId)
@@ -289,7 +290,7 @@ namespace HonuTasks.Services
         public async Task<List<Tasks>> GetAllTasksByTypeAsync(int creatorId, string typeName)
         {
             //LIST All Tickets with a Specific Type(Id)
-            int typeId = (await LookupTaskTypeIdAsync(typeName)).Value;
+            int typeId = (await LookupTasksTypeIdAsync(typeName)).Value;
 
             return await _context.Events.Where(p => p.CreatorId == creatorId)
                                                       .SelectMany(p => p.Tasks)
@@ -299,7 +300,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.TaskTypeId == typeId)
@@ -319,7 +320,7 @@ namespace HonuTasks.Services
                                                              .Include(t => t.AssignedUser)
                                                              .Include(t => t.OwnerUser)
                                                              .Include(t => t.TaskPriority)
-                                                             .Include(t => t.TaskStatus)
+                                                             .Include(t => t.TasksStatus)
                                                              .Include(t => t.TaskType)
                                                              .Include(t => t.Event)
                                                              .Where(t => t.Archived == true)
@@ -348,7 +349,7 @@ namespace HonuTasks.Services
             return myTasks;
         }
 
-        public async Task<HTUser> GetTaskDeveloperAsync(int taskId)
+        public async Task<HTUser> GetTasksDeveloperAsync(int taskId)
         {
             //LIST All Assigned User with a Specific TaskId
 
@@ -362,7 +363,7 @@ namespace HonuTasks.Services
             return developer;
         }
 
-        public async Task<int?> LookupTaskPriorityIdAsync(string priorityName) //returns a Nullable value
+        public async Task<int?> LookupTasksPriorityIdAsync(string priorityName) //returns a Nullable value
         {
             try
             {
@@ -388,7 +389,7 @@ namespace HonuTasks.Services
             }
         }
 
-        public async Task<int?> LookupTaskTypeIdAsync(string typeName)  //returns a Nullable value
+        public async Task<int?> LookupTasksTypeIdAsync(string typeName)  //returns a Nullable value
         {
             try
             {

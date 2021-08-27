@@ -10,6 +10,8 @@ namespace HonuTasks.Models
 {
     public class Tasks
     {
+        internal bool userId;
+
         //Primary Key
         public int Id { get; set; }
 
@@ -18,7 +20,7 @@ namespace HonuTasks.Models
         public int EventId { get; set; }  //was ProjectId in BT
 
         [DisplayName("User")]
-        public string EventUserId { get; set; }
+        public string UserId { get; set; }
 
         [DisplayName("Task Priority")]
         public int TaskPriorityId { get; set; }  //was TicketPriorityId in BT
@@ -30,10 +32,10 @@ namespace HonuTasks.Models
         public int TaskTypeId { get; set; }  //was TicketTypeId in BT
 
         [DisplayName("Task Creator")]
-        public int OwnerUserId { get; set; }
+        public string OwnerUserId { get; set; }
 
         [DisplayName("Assigned User")]
-        public int AssignedUserId { get; set; }  //was DeveloperUserId in BT
+        public string AssignedUserId { get; set; }  //was DeveloperUserId in BT
 
         [Required]
         [StringLength(50)]

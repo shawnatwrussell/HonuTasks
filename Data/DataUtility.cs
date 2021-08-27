@@ -32,7 +32,6 @@ namespace HonuTasks.Data
         private static int creator5Id;
         private static int creator6Id;
         private static int creator7Id;
-        private static object dbEvent;
 
         public static string GetConnectionString(IConfiguration configuration)
 
@@ -66,7 +65,7 @@ namespace HonuTasks.Data
         }
 
         //Add Data to the Database
-        public static async Tasks ManageDataAsync(IHost host)
+        public static async Task ManageDataAsync(IHost host)
         {
             using var svcScope = host.Services.CreateScope();
             var svcProvider = svcScope.ServiceProvider;
@@ -94,7 +93,7 @@ namespace HonuTasks.Data
             await SeedDefaultTasksStatusAsync(dbContextSvc);
             await SeedDefaultTaskPriorityAsync(dbContextSvc);
             await SeedDefaultEventPriorityAsync(dbContextSvc);
-            await SeedDefautEventAsync(dbContextSvc);
+            await SeedDefautEventsAsync(dbContextSvc);
             await SeedDefautTasksAsync(dbContextSvc);
         }
 
@@ -109,7 +108,7 @@ namespace HonuTasks.Data
             await roleManager.CreateAsync(new IdentityRole(Roles.DemoUser.ToString()));
         }
 
-        public static async Tasks SeedDefaultCreatorsAsync(ApplicationDbContext context)
+        public static async Task SeedDefaultCreatorsAsync(ApplicationDbContext context)
         {
             try
             {
@@ -148,7 +147,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefaultEventPriorityAsync(ApplicationDbContext context)
+        public static async Task SeedDefaultEventPriorityAsync(ApplicationDbContext context)
         {
             try
             {
@@ -174,7 +173,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefautEventsAsync(ApplicationDbContext context)
+        public static async Task SeedDefautEventsAsync(ApplicationDbContext context)
         {
             //Get project priority Ids
             int priorityLow = context.EventPriority.FirstOrDefault(p => p.Name == "Low").Id;
@@ -247,7 +246,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefaultEventStatusAsync(ApplicationDbContext context)
+        public static async Task SeedDefaultEventStatusAsync(ApplicationDbContext context)
         {
             try
             {
@@ -276,7 +275,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefaultUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
+        public static async Task SeedDefaultUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
             IConfiguration configuration, IHTImageService imageService)
         {
             var defaultImageData = await imageService.EncodeFileAsync(configuration["DefaultUserImage"]);
@@ -315,7 +314,7 @@ namespace HonuTasks.Data
 
         }
 
-        public static async Tasks SeedDemoUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
+        public static async Task SeedDemoUsersAsync(UserManager<HTUser> userManager, RoleManager<IdentityRole> roleManager,
             IConfiguration configuration, IHTImageService imageService)
         {
             var defaultImageData = await imageService.EncodeFileAsync(configuration["DefaultUserImage"]);
@@ -488,7 +487,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefaultTaskTypeAsync(ApplicationDbContext context)
+        public static async Task SeedDefaultTaskTypeAsync(ApplicationDbContext context)
         {
             try
             {
@@ -514,7 +513,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefaultTasksStatusAsync(ApplicationDbContext context)
+        public static async Task SeedDefaultTasksStatusAsync(ApplicationDbContext context)
         {
             try
             {
@@ -543,7 +542,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefaultTaskPriorityAsync(ApplicationDbContext context)
+        public static async Task SeedDefaultTaskPriorityAsync(ApplicationDbContext context)
         {
             try
             {
@@ -570,7 +569,7 @@ namespace HonuTasks.Data
             }
         }
 
-        public static async Tasks SeedDefautTasksAsync(ApplicationDbContext context)
+        public static async Task SeedDefautTasksAsync(ApplicationDbContext context)
         {
             //Get project Ids
             int portfolioId = context.Events.FirstOrDefault(p => p.Name == "Build a Personal Porfolio").Id;

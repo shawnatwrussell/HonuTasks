@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HonuTasks.Extensions
 {
-    public class IdentityExtensions
+    public static class IdentityExtensions
     {
         public static int? GetEventUserId(this IIdentity identity)
         {

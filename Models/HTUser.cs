@@ -57,6 +57,8 @@ namespace HonuTasks.Models
         public int? CreatorId { get; set; }
 
         //Navigational Properties
+        public virtual Creator Creator { get; set; }
+
         public virtual ICollection<Events> Events { get; set; } =
             new HashSet<Events>();
     }
