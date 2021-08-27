@@ -86,7 +86,7 @@ namespace HonuTasks.Services
                                              .Include(p => p.Tasks)
                                                 .ThenInclude(t => t.TaskPriority)
                                              .Include(p => p.Tasks)
-                                                .ThenInclude(t => t.TaskStatus)
+                                                .ThenInclude(t => t.TasksStatus)
                                              .Include(p => p.Tasks)
                                                 .ThenInclude(t => t.TaskType)
                                              .Where(p => p.CreatorId == creatorId).ToListAsync();

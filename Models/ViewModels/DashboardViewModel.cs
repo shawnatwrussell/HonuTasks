@@ -8,10 +8,11 @@ namespace HonuTasks.Models.ViewModels
     public class DashboardViewModel
     {
         public int Id { get; set; }
+        public int CreatorId { get; set; }
         public int EventUserId { get; set; }
         public int EventId { get; set; }
 
-
+        public Creator Creator { get; set; }
         public List<Events> Events { get; set; }
         public Events Name { get; set; }
         public Tasks Title { get; set; }

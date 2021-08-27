@@ -8,10 +8,10 @@ namespace HonuTasks.Models.ViewModels
 {
     public class AssignUserViewModel
     {
-        public SelectList Users { get; set; }
+        public SelectList AssignedUsers { get; set; }
 
-        public string UserId { get; set; }
+        public string AssignedUserId { get; set; }
 
-        public Tasks Task { get; set; }
+        public Tasks Tasks { get; set; }
     }
 }

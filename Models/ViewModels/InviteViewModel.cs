@@ -10,8 +10,8 @@ namespace HonuTasks.Models.ViewModels
 {
     public class InviteViewModel
     {
-        [DisplayName("User")]
-        public HTUser User { get; set; }  //CreaterUser?
+        [Display(Name = "Creator")]
+        public Creator Creator { get; set; }
 
         [Required]
         [EmailAddress]

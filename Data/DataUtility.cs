@@ -12,9 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
-using HonuTasks.Models;
-using HonuTasks.Models.Enums;
-using HonuTasks.Services.Interfaces;
 
 
 

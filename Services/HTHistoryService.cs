@@ -110,11 +110,11 @@ namespace HonuTasks.Services
                     {
                         TaskId = newTask.Id,
                         Property = "Task Status",
-                        OldValue = oldTask.TaskStatus.ToString(),
-                        NewValue = newTask.TaskStatus.ToString(),
+                        OldValue = oldTask.TasksStatus.ToString(),
+                        NewValue = newTask.TasksStatus.ToString(),
                         Created = DateTimeOffset.Now,
                         UserId = userId,
-                        Description = $"New Task Status: {newTask.TaskStatus}"
+                        Description = $"New Task Status: {newTask.TasksStatus}"
                     };
                     await _context.TaskHistory.AddAsync(history);
                 }
