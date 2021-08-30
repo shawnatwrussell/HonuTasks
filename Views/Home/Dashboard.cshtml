@@ -1,8 +1,410 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HonuTasks.Models.ViewModels.DashboardViewModel
+
+
+@using HonuTasks.Services.Interfaces
+@using Microsoft.AspNetCore.Identity
+@using HonuTasks.Extensions
+@using HonuTasks.Models
+
+@inject IHTCreatorInfoService CompanyInfoService
+@inject IHTRolesService RolesService
+@inject IHTEventService ProjectService
+@inject IHTTasksService TicketService
+@inject UserManager<HTUser> UserManager
+@inject IHTImageService ImageService
+
+
+@{
+    int creatorId = User.Identity.GetCreatorId().Value;
+    HTUser htUser = await UserManager.GetUserAsync(User);
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section>
+    <h1 class="m-0">Dashboard</h1>
+
+    <!-- Info boxes -->
+    <div class="row">
+        <!--AssignedUser Tasks-->
+        <div class="col">
+            <div class="info-box bg-gray">
+                <span class="info-box-icon bg-warning elevation-1">
+                    <i class="fas fa-user-check"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">@Model.AssignedTasks.Count Assigned Tasks</span>
+                    <a asp-area="Tasks" class="text-black" area-page="MyTasks">My Tasks</a>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!--CreatorUser Tasks-->
+        <div class="col">
+            <div class="info-box bg-gray">
+                <span class="info-box-icon bg-success elevation-1">
+                    <i class="fas fa-check-circle"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">@Model.CreatedTasks.Count Added Tasks</span>
+                    <a asp-area="Tasks" class="text-black" area-page="MyTickets">Created Tasks</a>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!--All Tasks-->
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col">
+                <div class="info-box bg-gray">
+                    <span class="info-box-icon bg-primary elevation-1">
+                        <i class="fas fa-ticket-alt"></i>
+                    </span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">@Model.Tasks.Count Active Tasks</span>
+                        <a asp-area="Tasks" class="text-black" area-page="MyTasks">All Tasks</a>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+            </div>
+        }
+        <!-- /.row -->
+    </div>
+
+
+    <!--CHART INFO AREA-->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-header bg-gradient-cyan">
+                    <h5 class="card-title">TASK SUMMARY</h5>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- /.card-header -->
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <!--CHARTS-->
+                            <!--TODO: TaskStatuses Chart-->
+                            <div class="row clearfix">
+                                <div class="col-4">
+                                    <div class="chart-responsive">
+                                        <canvas id="pieChart" height="250">
+                                        </canvas>
+                                    </div>
+                                </div>
+
+                                <!--TODO: TaskPriorities Chart-->
+                                <div class="col-4">
+                                    <div class="chart-responsive">
+                                        <canvas id="donutChart" height="250"></canvas>
+                                    </div>
+                                    <!-- ./chart-responsive -->
+                                </div>
+                                <!-- /.col -->
+                                <!--TODO: TaskTypes Chart-->
+                                <div class="col-4">
+                                    <div class="chart-responsive">
+                                        <canvas id="pieTwoChart" height="250">
+                                        </canvas>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- /CHARTS -->
+                            <!-- /.col -->
+                            <!-- /.row -->
+                        </div>
+                    </div>
+                </div>
+                <!-- ./card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    <!-- TABLE: LIST of Tasks For EACH Event-->
+    @foreach (var events in Model.Events)
+    {
+        <div class="card bg-light collapsed-card">
+            <div class="card-header bg-gradient-cyan border-transparent">
+                <h3 class="card-title">@events.Name : Tasks</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table m-0 table-striped" id="datatable">
+                        <thead>
+                            <tr>
+                                <th>PRIORITY</th>
+                                <th>TITLE</th>
+                                <th>DESCRIPTION</th>
+                                <th>TYPE</th>
+                                <th>CREATED DATE</th>
+                                <th>UPDATED DATE</th>
+                                <th>STATUS</th>
+                                <th>DETAILS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tasks in Model.Tasks)
+                            {
+                                <tr>
+                                    <td>@tasks.TaskPriority.Name</td>
+                                    <td>@tasks.Title</td>
+                                    <td>@tasks.Description</td>
+                                    <td>@tasks.TaskType.Name</td>
+                                    <td>@tasks.Created</td>
+                                    <td>@tasks.Updated</td>
+                                    <td>@tasks.TicketStatus.Name</td>
+                                    <td>
+                                        <a class="btn btn-info btn-block" href="/Tickets/Details/@tasks.Id">Details</a>
+                                        <a class="btn btn-success btn-block" href="/Tickets/Edit/@tasks.Id">Edit</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    }
+
+
+    <!-- Main row -->
+    <div class="row">
+        <!-- Left col -->
+        <div class="col">
+            <div class="row">
+                <div class="col">
+                    <!-- USERS LIST -->
+                    <div class="card bg-gradient-blue collapsed-card">
+                        <div class="card-header bg-gradient-cyan">
+                            <h3 class="card-title">Members</h3>
+                            <div class="card-tools">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <span class="badge badge-light">
+                                        <a asp-controller="Projects" asp-action="AssignUsers">Assign Members</a>
+                                    </span>
+                                }
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+
+                        <div class="card-body p-0">
+                            <ul class="users-list clearfix">
+                                @foreach (var user in Model.Members)
+                                {
+                                    <li>
+                                        <img src="@ImageService.DecodeImage(user.AvatarFileData, user.ContentType)" alt="User Image">
+                                        <a class="users-list-name">@user.FullName</a>
+                                    </li>
+                                }
+                            </ul>
+                            <!-- /.users-list -->
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!--/.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+    </div>
+
+
+
+    <!-- TABLE: PROJECTS -->
+    <div class="card bg-light collapsed-card">
+        <div class="card-header bg-gradient-cyan border-transparent">
+            <h3 class="card-title">Projects</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+            <div class="table-responsive table-striped">
+                <table class="table m-0" id="datatable">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>DESCRIPTION</th>
+                            <th>PRIORITY</th>
+                            <th>STARTED</th>
+                            <th>DUE</th>
+                            <th>CREATED</th>
+                            <th>TICKETS</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var projects in Model.Projects)
+                        {
+                            <tr>
+                                <td>@projects.Name</td>
+                                <td>@projects.Description</td>
+                                <td>@projects.ProjectPriority.Name</td>
+                                <td>@projects.StartDate</td>
+                                <td>@projects.EndDate</td>
+                                <td>@projects.Created</td>
+                                <td>@projects.Tickets.Count</td>
+                                <td>
+                                    <a class="btn btn-info btn-block" asp-controller="Projects" asp-action="Details" asp-route-id="@projects.Id">Details</a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a class="btn btn-success btn-block" asp-controller="Projects" asp-action="Edit" asp-route-id="@projects.Id">Edit</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.table-responsive -->
+        </div>
+        <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+</section>
+
+
+<!-- Page specific script -->
+<script src="~/dist/js/adminlte.min.js"></script>
+
+<!--Donut Chart-->
+@section scripts
+{
+    <!--DONUT CHART-->
+    <script type="text/javascript">
+        $.ajax({
+            type: "Post",
+            url: "/Home/DonutMethod",
+            data: '{}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                //Donut
+                var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
+                var donutData = result
+
+                var donutOptions = {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                }
+
+                //Create Pie or Donut Chart
+                //Use the Method Below to switch from pie to donut
+                new Chart(donutChartCanvas, {
+                    type: 'doughnut',
+                    data: donutData,
+                    options: donutOptions
+                })
+            },
+
+            failure: function (result) {
+                alert(result.d);
+            },
+
+            error: function (result) {
+                alert(result.d);
+            }
+        });
+    </script>
+
+    <!--PIE CHART-->
+    <script type="text/javascript">
+        $.ajax({
+            type: "Post",
+            url: "/Home/PieMethod",
+            data: '{}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                //PIE
+                var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
+                var pieData = result
+
+                var pieOptions = {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                }
+
+                //Create Pie or Donut Chart
+                //Use the Method Below to switch from pie to donut
+                new Chart(pieChartCanvas, {
+                    type: 'pie',
+                    data: pieData,
+                    options: pieOptions
+                })
+            },
+
+            failure: function (result) {
+                alert(result.d);
+            },
+
+            error: function (result) {
+                alert(result.d);
+            }
+        });
+    </script>
+
+    <!--PIE CHART#2-->
+    <script type="text/javascript">
+        $.ajax({
+            type: "Post",
+            url: "/Home/PieTwoMethod",
+            data: '{}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                //PIE
+                var pieTwoChartCanvas = $('#pieTwoChart').get(0).getContext('2d')
+                var pieTwoData = result
+
+                var pieTwoOptions = {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                }
+
+                //Create Pie or Donut Chart
+                //Use the Method Below to switch from pie to donut
+                new Chart(pieTwoChartCanvas, {
+                    type: 'pie',
+                    data: pieTwoData,
+                    options: pieTwoOptions
+                })
+            },
+
+            failure: function (result) {
+                alert(result.d);
+            },
+
+            error: function (result) {
+                alert(result.d);
+            }
+        });
+    </script>
+
+}
